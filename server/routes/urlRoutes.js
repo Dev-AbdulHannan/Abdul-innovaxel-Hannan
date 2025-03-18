@@ -25,6 +25,7 @@ router.get("/:shortCode", async (req, res) => {
   res.redirect(url.url);
 });
 
+// Update Short URL
 router.put("/shorten/:shortCode", async (req, res) => {
   const { url } = req.body;
   const { shortCode } = req.params;
@@ -41,6 +42,34 @@ router.put("/shorten/:shortCode", async (req, res) => {
     return res.status(404).json({ error: "Short URL not found" });
 
   res.status(200).json(updatedUrl);
+});
+
+// Delete Short URL (NEW)
+router.delete("/shorten/:shortCode", async (req, res) => {
+  const deletedUrl = await Url.findOneAndDelete({
+    shortCode: req.params.shortCode,
+  });
+
+  if (!deletedUrl)
+    return res.status(404).json({ error: "Short URL not found" });
+
+  res.status(204).send();
+});
+
+// Get URL Statistics (NEW)
+router.get("/shorten/:shortCode/stats", async (req, res) => {
+  const url = await Url.findOne({ shortCode: req.params.shortCode });
+
+  if (!url) return res.status(404).json({ error: "Short URL not found" });
+
+  res.status(200).json({
+    id: url._id,
+    url: url.url,
+    shortCode: url.shortCode,
+    createdAt: url.createdAt,
+    updatedAt: url.updatedAt,
+    accessCount: url.accessCount,
+  });
 });
 
 module.exports = router;

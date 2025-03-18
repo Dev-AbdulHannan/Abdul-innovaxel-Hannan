@@ -25,4 +25,22 @@ router.get("/:shortCode", async (req, res) => {
   res.redirect(url.url);
 });
 
+router.put("/shorten/:shortCode", async (req, res) => {
+  const { url } = req.body;
+  const { shortCode } = req.params;
+
+  if (!url) return res.status(400).json({ error: "URL is required" });
+
+  const updatedUrl = await Url.findOneAndUpdate(
+    { shortCode },
+    { url, updatedAt: new Date() },
+    { new: true }
+  );
+
+  if (!updatedUrl)
+    return res.status(404).json({ error: "Short URL not found" });
+
+  res.status(200).json(updatedUrl);
+});
+
 module.exports = router;
